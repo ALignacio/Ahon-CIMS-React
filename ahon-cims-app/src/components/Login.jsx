@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import './Login.css';
 import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import { useNavigate } from 'react-router-dom';
 
-function Login({ onSignUp }) {
+function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Staff Caseworker');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Add login logic here
-    alert(`Username: ${username}\nPassword: ${password}`);
+    // ...login logic...
+    const loginSuccess = username === 'admin' && password === 'password';
+    if (loginSuccess) {
+      navigate('/dashboard');
+    } else {
+      alert('Invalid credentials');
+    }
   };
 
   return (
@@ -18,7 +25,7 @@ function Login({ onSignUp }) {
       <div className="login-box">
         <img src={logo} alt="Logo" className="login-logo" />
         <h4>Ahon Ministries CIMS</h4>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="email">Username</label>
             <input
@@ -53,7 +60,16 @@ function Login({ onSignUp }) {
           </div>
           <button type="submit" className="login-btn">Login</button>
           <p className="signup-text">
-            Don't have an account? <a href="#" onClick={e => {e.preventDefault(); onSignUp();}}>Sign up now</a>
+            Don't have an account?{' '}
+            <a
+              href="#"
+              onClick={e => {
+                e.preventDefault();
+                navigate('/signup');
+              }}
+            >
+              Sign up now
+            </a>
           </p>
         </form>
       </div>

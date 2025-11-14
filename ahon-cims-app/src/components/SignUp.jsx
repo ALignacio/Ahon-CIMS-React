@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import './SignUp.css';
 import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import { useNavigate } from 'react-router-dom';
 
-function SignUp({ onBack }) {
+function SignUp() {
   const [fullname, setFullname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');   
   const [role, setRole] = useState('Staff Caseworker');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -75,7 +77,16 @@ function SignUp({ onBack }) {
           </div>
           <button type="submit" className="login-btn">Sign Up</button>
           <p className="signup-text">
-            Already have an account? <a href="#" onClick={onBack}>Login</a>
+            Already have an account?{' '}
+            <a
+              href="#"
+              onClick={e => {
+                e.preventDefault();
+                navigate('/');
+              }}
+            >
+              Login
+            </a>
           </p>
         </form>
       </div>
