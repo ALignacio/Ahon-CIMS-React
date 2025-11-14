@@ -126,6 +126,18 @@ body {
   outline: 2px solid #00794e; 
 }
 
+.module-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.module-title .icon {
+  font-size: 2rem;
+}
+
 .access-btn {
   background: #fff;
   color: #00794e;

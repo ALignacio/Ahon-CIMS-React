@@ -53,12 +53,18 @@ const Dashboard = () => {
         <h4>System Modules</h4>
         <div className="dashboard-modules">
           <div className="module-card">
-            <span>👥 Child Records</span>
+            <span className="module-title">
+              <span className="icon">👥</span>
+              <span>Child Records</span>
+            </span>
             <p>View and manage sponsored children profiles</p>
             <button className="access-btn">Access Module</button>
           </div>
           <div className="module-card">
-            <span>📄 Reports</span>
+            <span className="module-title">
+              <span className="icon">📄</span>
+              <span>Reports</span>
+            </span>
             <p>Generate comprehensive progress reports</p>
             <button className="access-btn">Access Module</button>
           </div>
@@ -67,6 +73,7 @@ const Dashboard = () => {
         {/* Recent Activity */}
         <h4>Recent Activity</h4>
         <div className="recent-activity">
+        <span> <b> Latest updates and changes in the system </b> </span>
           <div className="activity-card">
             <span>New child profile added: Maria Santos</span>
             <span>2 hours ago • by System</span>
