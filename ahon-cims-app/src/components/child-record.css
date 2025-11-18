@@ -1,0 +1,144 @@
+.access-module-container {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 0 24px;
+}
+
+.dashboard-header {
+  background: #00794e;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 1rem;
+}
+
+.logout-btn {
+  background: #fff;
+  color: #00794e;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #e0f7ea;
+}
+
+.access-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.access-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #00794e;
+  font-weight: 600;
+}
+
+.access-title span {
+  font-size: 1rem;
+  color: #555;
+}
+
+.back-btn {
+  background: #fff;
+  color: #00794e;
+  border: 2px solid #00794e;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #e0f7ea;
+}
+
+.add-child-btn {
+  background: #00794e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.add-child-btn:hover {
+  background: #005f3c;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #f7f7f7;
+  border: 1.5px solid #b4d6be;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin: 24px 0;
+  gap: 12px;
+}
+
+.search-box .icon {
+  font-size: 1.3rem;
+  color: #00794e;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+  padding: 4px 0;
+}
+
+.children-list {
+  background: #fff;
+  border: 1.5px solid #b4d6be;
+  border-radius: 12px;
+  padding: 32px 24px;
+  min-height: 80px;
+  margin-bottom: 24px;
+  color: #555;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+

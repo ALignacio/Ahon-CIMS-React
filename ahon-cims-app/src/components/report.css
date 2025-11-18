@@ -1,0 +1,259 @@
+.dashboard-header {
+  background: #00794e;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 32px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 1rem;
+}
+
+.logout-btn {
+  background: #fff;
+  color: #00794e;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.logout-btn:hover {
+  background: #e0f7ea;
+}
+
+.access-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.access-title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #00794e;
+  font-weight: 600;
+}
+
+.access-title span {
+  font-size: 1rem;
+  color: #555;
+}
+
+.reports-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 0 16px;
+}
+
+.reports-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.reports-header h2 {
+  margin: 0;
+  color: #00794e;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.reports-header span {
+  color: #555;
+  font-size: 1rem;
+}
+
+.back-btn {
+  display: inline-block;
+  width: auto;
+  min-width: 120px;
+  padding: 6px 16px;
+  font-size: 0.95rem;
+  margin: 24px 0 0 auto;
+  background: #fff;
+  color: #00794e;
+  border: 2px solid #00794e;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  float: right;
+}
+
+.back-btn:hover {
+  background: #e0f7ea;
+}
+
+.reports-icon {
+  background: #e0f7ea;
+  color: #00794e;
+  font-size: 2.2rem;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-box {
+  background: #fff;
+  border: 1.5px solid #b4d6be;
+  border-radius: 16px;
+  padding: 32px 28px;
+  margin-top: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.report-box h3 {
+  margin-top: 0;
+  color: #00794e;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.report-desc {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 18px;
+  display: block;
+}
+
+.report-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 18px;
+}
+
+.report-text {
+ display: flex;
+ gap: 12px;
+ align-items: center; 
+}
+
+.report-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report-field-end {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.report-field label {
+  font-weight: 500;
+  color: #00794e;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.report-field select {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #f7f7f7;
+  font-size: 1rem;
+  margin-top: 4px;
+}
+
+.report-modules-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+  justify-content: space-between;
+}
+
+.report-modules-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding-bottom: 10px;
+  flex : 1;
+}
+
+.report-modules-col label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  color: #222;
+}
+
+.report-modules-label {
+  margin: 18px 0 8px 0;
+  font-weight: 100;
+  color: #222;
+}
+
+.generate-btn {
+  background: #00794e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  transition: background 0.2s;
+}
+
+.generate-btn:hover {
+  background: #005f3c;
+}
+
+.generate-btn .icon {
+  font-size: 1.3rem;
+}
+
+@media (max-width: 600px) {
+  .reports-container {
+    max-width: 100%;
+    padding: 0 4px;
+  }
+  .report-row,
+  .report-modules-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .report-box {
+    padding: 18px 8px;
+  }
+}

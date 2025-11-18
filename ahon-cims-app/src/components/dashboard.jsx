@@ -1,7 +1,9 @@
 import React from 'react';
 import './dashboard.css';
 import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
+  const navigate = useNavigate();
   return (
     <div>
       {/* Header */}
@@ -58,7 +60,9 @@ const Dashboard = () => {
               <span>Child Records</span>
             </span>
             <p>View and manage sponsored children profiles</p>
-            <button className="access-btn">Access Module</button>
+            <button className="access-btn" onClick={() => navigate('/child-records')}>
+              Access Module
+            </button>
           </div>
           <div className="module-card">
             <span className="module-title">
@@ -66,7 +70,9 @@ const Dashboard = () => {
               <span>Reports</span>
             </span>
             <p>Generate comprehensive progress reports</p>
-            <button className="access-btn">Access Module</button>
+            <button className="access-btn" onClick={() => navigate('/reports')}>
+              Access Module
+            </button>
           </div>
         </div>
 
