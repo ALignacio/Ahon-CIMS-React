@@ -61,7 +61,11 @@ const navigate = useNavigate();
                   onChange={e => setReportType(e.target.value)}
                 >
                   <option>Comprehensive Report</option>
-                  <option>Summary Report</option>
+                  <option>Home Monitoring Only</option>
+                  <option>School Monitoring Only</option>
+                  <option>Health Monitoring Only</option>
+                  <option>Financial Summary</option>
+                  <option>Individual Child Report</option>
                 </select>
               </div>
               <div className="report-field report-field-end">
@@ -70,9 +74,11 @@ const navigate = useNavigate();
                   value={reportPeriod}
                   onChange={e => setReportPeriod(e.target.value)}
                 >
-                  <option>Quarterly</option>
                   <option>Monthly</option>
-                  <option>Yearly</option>
+                  <option>Quarterly</option>
+                  <option>Semi-annual</option>
+                  <option>Annual</option>
+                  <option>Custom range</option>
                 </select>
               </div>
             </div>
