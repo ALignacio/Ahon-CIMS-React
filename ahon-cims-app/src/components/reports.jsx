@@ -123,6 +123,86 @@ const navigate = useNavigate();
             </button>
           </form>
         </div>
+        <div className="recent-reports-box">
+          <h4 className="recent-reports-title">Recent Reports</h4>
+          <span className="recent-reports-desc">Previously generated reports</span>
+          <div className="recent-report-list">
+            <div className="recent-report-item">
+              <div>
+                <div className="recent-report-name">Q3 2025 Comprehensive Report</div>
+                <div className="recent-report-meta">2025-10-01 • Comprehensive</div>
+              </div>
+              <div className="recent-report-actions">
+                <button className="view-btn"><span role="img" aria-label="view">👁️</span> View</button>
+                <button className="download-btn"><span role="img" aria-label="download">⬇️</span> Download</button>
+              </div>
+            </div>
+            <div className="recent-report-item">
+              <div>
+                <div className="recent-report-name">Health Monitoring Summary - September</div>
+                <div className="recent-report-meta">2025-09-30 • Health</div>
+              </div>
+              <div className="recent-report-actions">
+                <button className="view-btn"><span role="img" aria-label="view">👁️</span> View</button>
+                <button className="download-btn"><span role="img" aria-label="download">⬇️</span> Download</button>
+              </div>
+            </div>
+            <div className="recent-report-item">
+              <div>
+                <div className="recent-report-name">Financial Report - Q2 2025</div>
+                <div className="recent-report-meta">2025-07-01 • Financial</div>
+              </div>
+              <div className="recent-report-actions">
+                <button className="view-btn"><span role="img" aria-label="view">👁️</span> View</button>
+                <button className="download-btn"><span role="img" aria-label="download">⬇️</span> Download</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="report-templates-box">
+          <h3 className="report-templates-title">Report Templates</h3>
+          <span className="report-templates-desc">
+            Use these templates for quick report generation
+          </span>
+          <div className="report-templates-list">
+            <div className="report-template-card">
+              <div>
+                <div className="report-template-name">Comprehensive Report Template</div>
+                <div className="report-template-meta">For in-depth analysis</div>
+              </div>
+              <button className="template-btn">
+                <span className="icon">📥</span> Use Template
+              </button>
+            </div>
+            <div className="report-template-card">
+              <div>
+                <div className="report-template-name">Summary Report Template</div>
+                <div className="report-template-meta">For quick overviews</div>
+              </div>
+              <button className="template-btn">
+                <span className="icon">📥</span> Use Template
+              </button>
+            </div>
+            <div className="report-template-card">
+              <div>
+                <div className="report-template-name">Health Report Template</div>
+                <div className="report-template-meta">Focused on health metrics</div>
+              </div>
+              <button className="template-btn">
+                <span className="icon">📥</span> Use Template
+              </button>
+            </div>
+            <div className="report-template-card">
+              <div>
+                <div className="report-template-name">Financial Report Template</div>
+                <div className="report-template-meta">Detailed financial analysis</div>
+              </div>
+              <button className="template-btn">
+                <span className="icon">📥</span> Use Template
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
