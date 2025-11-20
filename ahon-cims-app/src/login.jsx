@@ -1,48 +1,82 @@
-import React, { useState } from 'react';
-import supabase from './supabaseClient';
+import { useState } from 'react';
+import supabase from '../supabaseClient'; // Import your fixed client
+import './Login.css';
+import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import { useNavigate } from 'react-router-dom';
 
-export default function Login() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(null);
+function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSignIn = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        setLoading(false);
-        if (error) setMessage(error.message);
-        else setMessage('Signed in');
-        console.log(data);
-    };
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    const handleSignUp = async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        const { data, error } = await supabase.auth.signUp({ email, password });
-        setLoading(false);
-        if (error) setMessage(error.message);
-        else setMessage('Check your email for confirmation');
-        console.log(data);
-    };
+    try {
+    // Use Supabase Auth
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
 
-    return (
-        <div>
-            <h2>Login / Sign Up</h2>
-            <form>
-                <div>
-                    <label>Email</label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" />
-                </div>
-                <button onClick={handleSignIn} disabled={loading}>Sign In</button>
-                <button onClick={handleSignUp} disabled={loading}>Sign Up</button>
-            </form>
-            {message && <p>{message}</p>}
-        </div>
-    );
+    if (error) throw error;
+
+      // If successful, go to dashboard
+      navigate('/dashboard');
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <img src={logo} alt="Logo" className="login-logo" />
+        <h4>Ahon Ministries CIMS</h4>
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              type="email" // Ensure type is email
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          
+          {/* Role selection isn't strictly needed for login but can stay if you want */}
+          
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          
+          <p className="signup-text">
+            Don't have an account?{' '}
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate('/signup'); }}>
+              Sign up now
+            </a>
+          </p>
+        </form>
+      </div>
+    </div>
+  );
 }
+
+export default Login;
