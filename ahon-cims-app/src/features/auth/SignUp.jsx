@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import supabase from '../supabaseClient'; // 👈 Import Supabase client
-import './SignUp.css';
-import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png'; // Ensure this path is correct based on your file structure
-
 import { useNavigate } from 'react-router-dom';
+import supabase from '../../lib/supabaseClient';
+import './SignUp.css';
+import logo from '../../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
 
 function SignUp() {
   const [fullname, setFullname] = useState('');

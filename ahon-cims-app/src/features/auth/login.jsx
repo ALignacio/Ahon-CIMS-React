@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import supabase from '../supabaseClient'; // 👈 CRITICAL: Imports your working client
-import './Login.css';
-import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
 import { useNavigate } from 'react-router-dom';
+import supabase from '../../lib/supabaseClient';
+import './Login.css';
+import logo from '../../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
 
 function Login() {
-  const [email, setEmail] = useState(''); // Changed to email state
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,18 +15,18 @@ function Login() {
     setLoading(true);
 
     try {
-      // DFD Process 1.0: Authenticate User
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email, 
-        password: password,
-      });
+    // Use Supabase Auth
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
 
-      if (error) throw error;
+    if (error) throw error;
 
-      // Success! Navigate to dashboard
+      // If successful, go to dashboard
       navigate('/dashboard');
     } catch (error) {
-      alert('Login Failed: ' + error.message);
+      alert(error.message);
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ function Login() {
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="email" // Use type email for Supabase auth
+              type="email" // Ensure type is email
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -60,8 +60,9 @@ function Login() {
               placeholder="Enter your password"
             />
           </div>
-          {/* Note: Removed the unused 'Role' select input to clean up */}
-
+          
+          {/* Role selection isn't strictly needed for login but can stay if you want */}
+          
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? 'Logging in...' : 'Login'}
           </button>

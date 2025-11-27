@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import supabase from './supabaseClient';
-
-// pages/components
-import Login from './components/Login.jsx';
-import SignUp from './components/SignUp.jsx';
-import Dashboard from './components/dashboard.jsx';
-import ChildRecord from './components/child-record.jsx';
-import Reports from './components/reports.jsx';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import supabase from "./lib/supabaseClient";
+import Login from "./features/auth/Login.jsx";
+import SignUp from "./features/auth/SignUp.jsx";
+import Dashboard from "./features/dashboard/dashboard.jsx";
+import AccessModule from "./features/children/child-record.jsx";
+import Reports from "./components/reports.jsx";
+import "./App.css";
 
 function AuthLoader({ children, onAuthChange }) {
   // small container to keep one auth subscription for the app
@@ -94,7 +92,7 @@ export default function App() {
             path="/child-records"
             element={
               <RequireAuth>
-                <ChildRecord />
+                <AccessModule />
               </RequireAuth>
             }
           />

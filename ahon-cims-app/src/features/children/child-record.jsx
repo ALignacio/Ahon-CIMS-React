@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import supabase from '../supabaseClient';
+import supabase from '../../lib/supabaseClient';
 import './child-record.css';
-import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import logo from '../../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
 
 const AccessModule = () => {
   const navigate = useNavigate();
