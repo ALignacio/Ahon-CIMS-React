@@ -166,12 +166,12 @@ const AccessModule = () => {
           .update({ ...payloadObj, assigned_caseworker_id: userId })
           .eq('id', editingIdLocal)
           .select()
-          .single();
+          .maybeSingle(); // fix: avoid "Cannot coerce the result to a single JSON object"
       } else {
         res = await supabase
           .from('children')
           .insert([{ ...payloadObj, assigned_caseworker_id: userId }])
-          .select();
+          .select(); // returns an array
       }
 
       if (!res.error) return res.data;
@@ -189,11 +189,38 @@ const AccessModule = () => {
     }
   };
 
+  const uploadPhotoAndGetUrl = async (file, childIdOrTempKey) => {
+    if (!file) return null;
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+    const path = `${childIdOrTempKey}-${Date.now()}.${ext}`;
+
+    const { data: uploadRes, error: uploadErr } = await supabase
+      .storage
+      .from('child-photos')
+      .upload(path, file, { upsert: true });
+
+    if (uploadErr) throw uploadErr;
+
+    const { data: publicUrlData } = supabase
+      .storage
+      .from('child-photos')
+      .getPublicUrl(uploadRes.path);
+
+    return publicUrlData?.publicUrl || null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+
+      // Upload photo first (use editingId or a temp key)
+      let photoUrl = null;
+      if (form.photoFile) {
+        const tempKey = editingId ?? (user?.id || 'anon');
+        photoUrl = await uploadPhotoAndGetUrl(form.photoFile, tempKey);
+      }
 
       const basePayload = {
         first_name: form.firstName || null,
@@ -208,7 +235,6 @@ const AccessModule = () => {
         emergency_phone: form.emergencyPhone || null,
         sponsor_name: form.sponsorName || null,
         status: form.status || 'Active',
-
         address: form.address || null,
         housing_type: form.housingType || null,
         household_members: form.householdMembers ? Number(form.householdMembers) : null,
@@ -218,6 +244,7 @@ const AccessModule = () => {
         allergies: form.allergies || null,
         medical_history: form.medicalHistory || null,
         assigned_caseworker_id: form.assignedCaseworkerId || user?.id || null,
+        ...(photoUrl ? { photo_url: photoUrl } : {}),
       };
 
       Object.keys(basePayload).forEach(k => {
@@ -226,16 +253,18 @@ const AccessModule = () => {
 
       if (editingId) {
         const updatedData = await attemptDb('update', { ...basePayload }, editingId, user?.id ?? null);
-        setChildrenList(prev => prev.map(c => (c.id === editingId ? updatedData : c)));
+        if (updatedData) {
+          setChildrenList(prev => prev.map(c => (c.id === editingId ? updatedData : c)));
+        }
         alert('Child updated successfully!');
       } else {
+        // Insert to get the new id, then optionally re-upload with id-based name (optional)
         const insertedData = await attemptDb('insert', { ...basePayload }, null, user?.id ?? null);
         const newRecord = Array.isArray(insertedData) ? insertedData[0] : insertedData;
-        setChildrenList(prev => [newRecord, ...prev]);
+        if (newRecord) setChildrenList(prev => [newRecord, ...prev]);
         alert('Child added successfully!');
       }
 
-      // optional: handle file upload to storage and update photo_url column (not implemented here)
       fetchChildren();
       closeModal();
     } catch (err) {
@@ -311,16 +340,56 @@ const AccessModule = () => {
 
         <div className="children-grid-container">
           {childrenList.length === 0 ? (
-            <div className="children-list">
-              <p>No children found. Use "Add New Child" to create a record.</p>
-            </div>
+            <div className="children-list"><p>No children found. Use "Add New Child" to create a record.</p></div>
           ) : (
             <ul className="child-records-list">
               {childrenList.map(child => (
-                <li key={child.id} className="child-card-item" onClick={() => openEdit(child)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') openEdit(child); }}>
-                  <strong>{child.first_name} {child.last_name}</strong><br />
-                  <small>ID: {child.sponsorship_id}</small><br />
-                  <span className={`status-badge ${String(child.status || '').toLowerCase()}`}>{child.status || 'Unknown'}</span>
+                <li
+                  key={child.id}
+                  className="child-card-item green-card"
+                  onClick={() => openEdit(child)}
+                >
+                  <div className="card-header">
+                    <div className="avatar circle">
+                      {child.photo_url ? (
+                        <img src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
+                      ) : (
+                        <div className="avatar-placeholder">👤</div>
+                      )}
+                    </div>
+                    <div className="title-block">
+                      <div className="name">{child.first_name} {child.last_name}</div>
+                      <div className="meta">Age: {child.date_of_birth ? getAge(child.date_of_birth) : '—'} years</div>
+                    </div>
+                    <span className={`status-badge ${String(child.status || '').toLowerCase()}`}>
+                      {(child.status || 'Active').toLowerCase()}
+                    </span>
+                  </div>
+
+                  <div className="card-body">
+                    <div className="row">
+                      <span className="label">ID:</span>
+                      <span className="value">{child.sponsorship_id || '—'}</span>
+                    </div>
+                    <div className="row">
+                      <span className="label">Gender:</span>
+                      <span className="value">{child.gender || '—'}</span>
+                    </div>
+                    <div className="row">
+                      <span className="label">Date of Birth:</span>
+                      <span className="value">{formatDate(child.date_of_birth)}</span>
+                    </div>
+                    {/* Duplicate rows to fill the second column for alignment */}
+                    <div className="row" />
+                    <div className="row" />
+                    <div className="row" />
+                  </div>
+
+                  <div className="card-footer">
+                    <button className="view-details-btn" onClick={() => openEdit(child)}>
+                      <span className="icon">👁️</span> View Details
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -472,3 +541,20 @@ const AccessModule = () => {
 };
 
 export default AccessModule;
+
+// Helper functions (place near top or bottom of file)
+function getAge(dobStr) {
+  if (!dobStr) return '—';
+  const dob = new Date(dobStr);
+  const diff = Date.now() - dob.getTime();
+  const ageDate = new Date(diff);
+  return Math.abs(ageDate.getUTCFullYear() - 1970);
+}
+function formatDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  const day = String(dt.getDate()).padStart(2, '0');
+  const month = String(dt.getMonth() + 1).padStart(2, '0');
+  const year = dt.getFullYear();
+  return `${day}/${month}/${year}`;
+}
