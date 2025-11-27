@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../../lib/supabaseClient';
 import './child-record.css';
 import logo from '../../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import ChildCard from './components/ChildCard';
 
 const AccessModule = () => {
   const navigate = useNavigate();
@@ -340,57 +341,17 @@ const AccessModule = () => {
 
         <div className="children-grid-container">
           {childrenList.length === 0 ? (
-            <div className="children-list"><p>No children found. Use "Add New Child" to create a record.</p></div>
+            <div className="children-list">
+              <p>No children found. Use "Add New Child" to create a record.</p>
+            </div>
           ) : (
             <ul className="child-records-list">
               {childrenList.map(child => (
-                <li
+                <ChildCard
                   key={child.id}
-                  className="child-card-item green-card"
-                  onClick={() => openEdit(child)}
-                >
-                  <div className="card-header">
-                    <div className="avatar circle">
-                      {child.photo_url ? (
-                        <img src={child.photo_url} alt={`${child.first_name} ${child.last_name}`} />
-                      ) : (
-                        <div className="avatar-placeholder">👤</div>
-                      )}
-                    </div>
-                    <div className="title-block">
-                      <div className="name">{child.first_name} {child.last_name}</div>
-                      <div className="meta">Age: {child.date_of_birth ? getAge(child.date_of_birth) : '—'} years</div>
-                    </div>
-                    <span className={`status-badge ${String(child.status || '').toLowerCase()}`}>
-                      {(child.status || 'Active').toLowerCase()}
-                    </span>
-                  </div>
-
-                  <div className="card-body">
-                    <div className="row">
-                      <span className="label">ID:</span>
-                      <span className="value">{child.sponsorship_id || '—'}</span>
-                    </div>
-                    <div className="row">
-                      <span className="label">Gender:</span>
-                      <span className="value">{child.gender || '—'}</span>
-                    </div>
-                    <div className="row">
-                      <span className="label">Date of Birth:</span>
-                      <span className="value">{formatDate(child.date_of_birth)}</span>
-                    </div>
-                    {/* Duplicate rows to fill the second column for alignment */}
-                    <div className="row" />
-                    <div className="row" />
-                    <div className="row" />
-                  </div>
-
-                  <div className="card-footer">
-                    <button className="view-details-btn" onClick={() => openEdit(child)}>
-                      <span className="icon">👁️</span> View Details
-                    </button>
-                  </div>
-                </li>
+                  child={child}
+                  onSelect={openEdit}
+                />
               ))}
             </ul>
           )}
@@ -541,20 +502,3 @@ const AccessModule = () => {
 };
 
 export default AccessModule;
-
-// Helper functions (place near top or bottom of file)
-function getAge(dobStr) {
-  if (!dobStr) return '—';
-  const dob = new Date(dobStr);
-  const diff = Date.now() - dob.getTime();
-  const ageDate = new Date(diff);
-  return Math.abs(ageDate.getUTCFullYear() - 1970);
-}
-function formatDate(d) {
-  if (!d) return '—';
-  const dt = new Date(d);
-  const day = String(dt.getDate()).padStart(2, '0');
-  const month = String(dt.getMonth() + 1).padStart(2, '0');
-  const year = dt.getFullYear();
-  return `${day}/${month}/${year}`;
-}

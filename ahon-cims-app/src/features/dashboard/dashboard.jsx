@@ -98,7 +98,10 @@ const Dashboard = () => {
               <span>Child Records</span>
             </span>
             <p>View and manage sponsored children profiles</p>
-            <button className="access-btn" onClick={() => navigate('/child-records')}>
+            <button
+              className="access-btn"
+              onClick={() => navigate('/child-records')}
+            >
               Access Module
             </button>
           </div>
@@ -108,7 +111,10 @@ const Dashboard = () => {
               <span>Reports</span>
             </span>
             <p>Generate comprehensive progress reports</p>
-            <button className="access-btn" onClick={() => navigate('/reports')}>
+            <button
+              className="access-btn"
+              onClick={() => navigate('/reports')}
+            >
               Access Module
             </button>
           </div>
