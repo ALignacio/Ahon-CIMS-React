@@ -275,3 +275,64 @@
   max-height: 95vh;
 }
 
+/* Photo section styles */
+.photo-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-top: 6px;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.photo-preview.circle {
+  width: 96px;
+  height: 96px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: #f3f4f6; /* light gray */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 2px solid rgba(0,0,0,0.04);
+}
+
+.photo-preview.circle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* placeholder text shown when no preview */
+.photo-preview .placeholder {
+  color: #9ca3af;
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+}
+
+/* upload button styling */
+.photo-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #065f46; /* green-ish */
+  font-weight: 600;
+}
+
+.photo-upload-btn:hover {
+  background: #f8fafc;
+}
+
+/* keep modal grid below photo section aligned */
+.modal-form .modal-section { margin-top: 8px; }
+

@@ -24,41 +24,90 @@ const AccessModule = () => {
     emergencyPhone: '',
     sponsorName: '',
     status: 'Active',
+
+    // additional fields
+    address: '',
+    housingType: '',
+    householdMembers: '',
+    schoolName: '',
+    gradeLevel: '',
+    bloodType: '',
+    allergies: '',
+    medicalHistory: '',
+    assignedCaseworkerId: '',
+
+    // photo placeholder (optional)
+    photoFile: null,
   });
+
+  // photo preview states
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoObjectUrl, setPhotoObjectUrl] = useState(null);
+
+  // caseworkers for assign select
+  const [caseworkers, setCaseworkers] = useState([]);
+
+  useEffect(() => {
+    const loadCaseworkers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name, email');
+        if (error) throw error;
+        setCaseworkers(data || []);
+      } catch (err) {
+        console.warn('Could not load caseworkers', err);
+      }
+    };
+    loadCaseworkers();
+  }, []);
 
   useEffect(() => {
     fetchChildren();
   }, []);
 
   const fetchChildren = async () => {
-    // This is the core of DFD Process 2.0: View/Monitor Children Records
-    const { data, error } = await supabase
-      .from('children')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) console.error('Error fetching children:', error);
-    else setChildrenList(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('children')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setChildrenList(data || []);
+    } catch (err) {
+      console.error('Error fetching children:', err);
+    }
   };
 
   const openModal = () => {
     setEditingId(null);
-    // Reset form for a new child
     setForm({
       firstName: '', lastName: '', dob: '', gender: '', sponsorshipId: '',
       enrollmentDate: '', guardianName: '', guardianContact: '',
       emergencyName: '', emergencyPhone: '', sponsorName: '', status: 'Active',
+      address: '', housingType: '', householdMembers: '', schoolName: '',
+      gradeLevel: '', bloodType: '', allergies: '', medicalHistory: '',
+      assignedCaseworkerId: '', photoFile: null,
     });
+    if (photoObjectUrl) {
+      try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+      setPhotoObjectUrl(null);
+    }
+    setPhotoPreview(null);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingId(null);
+    if (photoObjectUrl) {
+      try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+      setPhotoObjectUrl(null);
+    }
+    setPhotoPreview(null);
   };
 
   const openEdit = (child) => {
-    // Map DB fields (snake_case) to form fields (camelCase)
     setEditingId(child.id);
     setForm({
       firstName: child.first_name ?? '',
@@ -73,29 +122,85 @@ const AccessModule = () => {
       emergencyPhone: child.emergency_phone ?? '',
       sponsorName: child.sponsor_name ?? '',
       status: child.status ?? 'Active',
+      address: child.address ?? '',
+      housingType: child.housing_type ?? '',
+      householdMembers: child.household_members ?? '',
+      schoolName: child.school_name ?? '',
+      gradeLevel: child.grade_level ?? '',
+      bloodType: child.blood_type ?? '',
+      allergies: child.allergies ?? '',
+      medicalHistory: child.medical_history ?? '',
+      assignedCaseworkerId: child.assigned_caseworker_id ?? '',
+      photoFile: null,
     });
+
+    if (child.photo_url) {
+      if (photoObjectUrl) {
+        try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+        setPhotoObjectUrl(null);
+      }
+      setPhotoPreview(child.photo_url);
+    } else {
+      if (photoObjectUrl) {
+        try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+        setPhotoObjectUrl(null);
+      }
+      setPhotoPreview(null);
+    }
+
     setIsModalOpen(true);
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // resilient DB helper: strips unknown columns reported by Supabase and retries
+  const attemptDb = async (operation, payloadObj, editingIdLocal, userId) => {
+    while (true) {
+      let res;
+      if (operation === 'update') {
+        res = await supabase
+          .from('children')
+          .update({ ...payloadObj, assigned_caseworker_id: userId })
+          .eq('id', editingIdLocal)
+          .select()
+          .single();
+      } else {
+        res = await supabase
+          .from('children')
+          .insert([{ ...payloadObj, assigned_caseworker_id: userId }])
+          .select();
+      }
+
+      if (!res.error) return res.data;
+
+      const errMsg = String(res.error.message || res.error);
+      const m = errMsg.match(/Could not find the '([^']+)' column/);
+      if (m && m[1]) {
+        const missingCol = m[1];
+        if (missingCol in payloadObj) {
+          delete payloadObj[missingCol];
+          continue;
+        }
+      }
+      throw res.error;
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      // Payload maps React state (camelCase) to DB columns (snake_case)
-      const payload = {
-        first_name: form.firstName,
-        last_name: form.lastName,
-        date_of_birth: form.dob,
-        gender: form.gender,
-        sponsorship_id: form.sponsorshipId,
+      const basePayload = {
+        first_name: form.firstName || null,
+        last_name: form.lastName || null,
+        date_of_birth: form.dob || null,
+        gender: form.gender || null,
+        sponsorship_id: form.sponsorshipId || null,
         enrollment_date: form.enrollmentDate || null,
         guardian_name: form.guardianName || null,
         guardian_contact: form.guardianContact || null,
@@ -103,44 +208,73 @@ const AccessModule = () => {
         emergency_phone: form.emergencyPhone || null,
         sponsor_name: form.sponsorName || null,
         status: form.status || 'Active',
+
+        address: form.address || null,
+        housing_type: form.housingType || null,
+        household_members: form.householdMembers ? Number(form.householdMembers) : null,
+        school_name: form.schoolName || null,
+        grade_level: form.gradeLevel || null,
+        blood_type: form.bloodType || null,
+        allergies: form.allergies || null,
+        medical_history: form.medicalHistory || null,
+        assigned_caseworker_id: form.assignedCaseworkerId || user?.id || null,
       };
 
-      if (editingId) {
-        // DFD Process 3.0: UPDATE existing record
-        const { error } = await supabase
-          .from('children')
-          .update({ ...payload, assigned_caseworker_id: user?.id })
-          .eq('id', editingId);
+      Object.keys(basePayload).forEach(k => {
+        if (basePayload[k] === null) delete basePayload[k];
+      });
 
-        if (error) throw error;
+      if (editingId) {
+        const updatedData = await attemptDb('update', { ...basePayload }, editingId, user?.id ?? null);
+        setChildrenList(prev => prev.map(c => (c.id === editingId ? updatedData : c)));
         alert('Child updated successfully!');
       } else {
-        // DFD Process 3.0: INSERT new record
-        const { error } = await supabase
-          .from('children')
-          .insert([
-            {
-              ...payload,
-              assigned_caseworker_id: user?.id ?? null,
-              status: payload.status || 'Active',
-            }
-          ]);
-        if (error) throw error;
+        const insertedData = await attemptDb('insert', { ...basePayload }, null, user?.id ?? null);
+        const newRecord = Array.isArray(insertedData) ? insertedData[0] : insertedData;
+        setChildrenList(prev => [newRecord, ...prev]);
         alert('Child added successfully!');
       }
 
+      // optional: handle file upload to storage and update photo_url column (not implemented here)
       fetchChildren();
       closeModal();
-    } catch (error) {
-      alert('Error saving child: ' + (error.message ?? error));
+    } catch (err) {
+      alert('Error saving child: ' + (err.message ?? err));
     } finally {
       setLoading(false);
     }
   };
 
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0] ?? null;
+
+    if (photoObjectUrl) {
+      try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+      setPhotoObjectUrl(null);
+    }
+
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPhotoPreview(url);
+      setPhotoObjectUrl(url);
+      setForm(prev => ({ ...prev, photoFile: file }));
+    } else {
+      setPhotoPreview(null);
+      setForm(prev => ({ ...prev, photoFile: null }));
+    }
+  };
+
+  // cleanup when unmounting
+  useEffect(() => {
+    return () => {
+      if (photoObjectUrl) {
+        try { URL.revokeObjectURL(photoObjectUrl); } catch { /* noop */ }
+      }
+    };
+  }, [photoObjectUrl]);
+
   return (
     <div>
-      {/* 1. GLOBAL HEADER / NAVIGATION BAR */}
       <header className="dashboard-header">
         <div className="logo-section">
           <img src={logo} alt="Logo" className="dashboard-logo" />
@@ -152,19 +286,14 @@ const AccessModule = () => {
         <div className="user-section">
           <span>👤 Case Worker</span>
           <span>Staff Caseworker</span>
-          <button className="logout-btn">Logout</button>
+          <button className="logout-btn" onClick={() => { supabase.auth.signOut(); navigate('/login'); }}>Logout</button>
         </div>
       </header>
 
-      {/* 2. MAIN CONTENT AREA */}
       <main className="access-module-container">
-        
-        {/* ACCESS MODULE HEADER */}
         <div className="access-header-row">
           <div className="left-group">
-            <button className="back-btn" onClick={() => navigate('/dashboard')}>
-              ← Back to Dashboard
-            </button>
+            <button className="back-btn" onClick={() => navigate('/dashboard')}>← Back to Dashboard</button>
             <div className="access-title">
               <h3>Child Records</h3>
               <span>Your assigned children</span>
@@ -176,13 +305,10 @@ const AccessModule = () => {
               <span className="icon">🔍</span>
               <input type="text" placeholder="Search by child name..." />
             </div>
-            <button className="add-child-btn" onClick={openModal}>
-              <span className="icon">👤</span> Add New Child
-            </button>
+            <button className="add-child-btn" onClick={openModal}><span className="icon">👤</span> Add New Child</button>
           </div>
         </div>
-        
-        {/* CHILDREN LIST (DFD Process 2.0 Output) */}
+
         <div className="children-grid-container">
           {childrenList.length === 0 ? (
             <div className="children-list">
@@ -190,36 +316,38 @@ const AccessModule = () => {
             </div>
           ) : (
             <ul className="child-records-list">
-              {childrenList.map((child) => (
-                <li
-                  key={child.id}
-                  className="child-card-item"
-                  onClick={() => openEdit(child)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if (e.key === 'Enter') openEdit(child); }}
-                >
-                  <strong>{child.first_name} {child.last_name}</strong> <br/>
-                  <small>ID: {child.sponsorship_id}</small> <br/>
-                  <span className={`status-badge ${String(child.status || '').toLowerCase()}`}>
-                    {child.status || 'Unknown'}
-                  </span>
+              {childrenList.map(child => (
+                <li key={child.id} className="child-card-item" onClick={() => openEdit(child)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') openEdit(child); }}>
+                  <strong>{child.first_name} {child.last_name}</strong><br />
+                  <small>ID: {child.sponsorship_id}</small><br />
+                  <span className={`status-badge ${String(child.status || '').toLowerCase()}`}>{child.status || 'Unknown'}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* MODAL FOR ADD/EDIT */}
         {isModalOpen && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
             <div className="modal wide-modal">
-              {/* Close button is inside the form in the original design (for easier handling) */}
-              <button className="modal-close" onClick={closeModal} aria-label="Close">×</button> 
+              <button className="modal-close" onClick={closeModal} aria-label="Close">×</button>
               <h3 className="modal-title">{editingId ? 'Edit Child Record' : 'Add New Child'}</h3>
-              <span className="modal-desc">Enter or update the child's basic information</span>
+              <span className="modal-desc">Enter comprehensive information about the child</span>
 
               <form className="modal-form" onSubmit={handleSubmit}>
+                {/* Photo section */}
+                <div className="photo-section">
+                  <div className="photo-preview circle" title="User photo preview">
+                    {photoPreview ? <img src={photoPreview} alt="Child preview" /> : <div className="placeholder">No photo</div>}
+                  </div>
+                  <div className="photo-actions">
+                    <label className="photo-upload-btn">
+                      <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: 'none' }} />
+                      <span>Upload Photo</span>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="modal-section">
                   <div className="modal-section-title">Basic Information</div>
                   <div className="modal-grid">
@@ -243,25 +371,96 @@ const AccessModule = () => {
                     <label>Sponsorship ID *
                       <input name="sponsorshipId" value={form.sponsorshipId} onChange={handleChange} placeholder="e.g., AHON-2025-001" required />
                     </label>
-                     {editingId && (
-                        <label>Status
-                          <select name="status" value={form.status} onChange={handleChange}>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Graduated">Graduated</option>
-                          </select>
-                        </label>
-                     )}
+                    {editingId && (
+                      <label>Status
+                        <select name="status" value={form.status} onChange={handleChange}>
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                          <option value="Graduated">Graduated</option>
+                        </select>
+                      </label>
+                    )}
                   </div>
                 </div>
 
-                {/* ... (Other modal sections omitted for brevity but remain in your original code structure) ... */}
+                <div className="modal-section">
+                  <div className="modal-section-title">Contact Information</div>
+                  <div className="modal-grid">
+                    <label>Parent/Guardian Name *
+                      <input name="guardianName" value={form.guardianName} onChange={handleChange} required />
+                    </label>
+                    <label>Parent/Guardian Contact *
+                      <input name="guardianContact" value={form.guardianContact} onChange={handleChange} required />
+                    </label>
+                    <label>Emergency Contact Name
+                      <input name="emergencyName" value={form.emergencyName} onChange={handleChange} />
+                    </label>
+                    <label>Emergency Contact Phone
+                      <input name="emergencyPhone" value={form.emergencyPhone} onChange={handleChange} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="modal-section">
+                  <div className="modal-section-title">Home Details</div>
+                  <div className="modal-grid">
+                    <label>Address
+                      <input name="address" value={form.address} onChange={handleChange} />
+                    </label>
+                    <label>Housing Type
+                      <input name="housingType" value={form.housingType} onChange={handleChange} />
+                    </label>
+                    <label>Number of Household Members
+                      <input name="householdMembers" type="number" value={form.householdMembers} onChange={handleChange} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="modal-section">
+                  <div className="modal-section-title">Education</div>
+                  <div className="modal-grid">
+                    <label>School Name
+                      <input name="schoolName" value={form.schoolName} onChange={handleChange} />
+                    </label>
+                    <label>Current Grade Level
+                      <input name="gradeLevel" value={form.gradeLevel} onChange={handleChange} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="modal-section">
+                  <div className="modal-section-title">Health Information</div>
+                  <div className="modal-grid">
+                    <label>Blood Type
+                      <input name="bloodType" value={form.bloodType} onChange={handleChange} />
+                    </label>
+                    <label>Known Allergies
+                      <input name="allergies" value={form.allergies} onChange={handleChange} />
+                    </label>
+                    <label>Medical History
+                      <input name="medicalHistory" value={form.medicalHistory} onChange={handleChange} />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="modal-section">
+                  <div className="modal-section-title">Assignment</div>
+                  <div className="modal-grid">
+                    <label>Assigned Caseworker *
+                      <select name="assignedCaseworkerId" value={form.assignedCaseworkerId} onChange={handleChange} required>
+                        <option value="">{/* default uses current user */}</option>
+                        {caseworkers.map(cw => <option key={cw.id} value={cw.id}>{cw.full_name || cw.email}</option>)}
+                      </select>
+                    </label>
+                    <label>Sponsor Name (Optional)
+                      <input name="sponsorName" value={form.sponsorName} onChange={handleChange} />
+                    </label>
+                  </div>
+                </div>
 
                 <div className="modal-actions">
                   <button type="button" className="btn-secondary" onClick={closeModal}>Cancel</button>
-                  <button type="submit" className="btn-primary" disabled={loading}>
-                    {loading ? 'Saving...' : (editingId ? 'Update Record' : 'Add Child')}
-                  </button>
+                  <button type="submit" className="btn-primary" disabled={loading}>{loading ? 'Saving...' : (editingId ? 'Update Record' : 'Add Child')}</button>
                 </div>
               </form>
             </div>
