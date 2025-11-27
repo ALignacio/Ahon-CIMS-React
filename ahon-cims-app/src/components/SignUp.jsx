@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import supabase from '../supabaseClient'; // 👈 Import Supabase client
 import './SignUp.css';
-import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
+import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png'; // Ensure this path is correct based on your file structure
+
 import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
@@ -9,12 +11,44 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');   
   const [role, setRole] = useState('Staff Caseworker');
+  const [loading, setLoading] = useState(false); // 👈 Add loading state
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add sign up logic here
-    alert(`Sign Up\nFullname: ${fullname}\nEmail: ${email}\nRole: ${role}`);
+
+    // 1. Basic Validation
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 2. Call Supabase Sign Up
+      const { error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: fullname, // 👈 Stores name in user_metadata
+            role: role,          // 👈 Stores role in user_metadata
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      // 3. Handle Success
+      alert('Registration Successful! Please check your email to verify your account.');
+      navigate('/'); // Redirect to Login page
+
+    } catch (error) {
+      alert('Sign Up Failed: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +65,7 @@ function SignUp() {
               value={fullname}
               onChange={(e) => setFullname(e.target.value)}
               required
+              placeholder="Juan Dela Cruz"
             />
           </div>
           <div className="form-group">
@@ -41,6 +76,7 @@ function SignUp() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="juan@example.com"
             />
           </div>
           <div className="form-group">
@@ -51,6 +87,7 @@ function SignUp() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6} // Supabase requires min 6 chars by default
             />
           </div>
           <div className="form-group">
@@ -75,7 +112,11 @@ function SignUp() {
               <option value="Project Director">Project Director</option>
             </select>
           </div>
-          <button type="submit" className="login-btn">Sign Up</button>
+          
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Creating Account...' : 'Sign Up'}
+          </button>
+          
           <p className="signup-text">
             Already have an account?{' '}
             <a

@@ -1,9 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './dashboard.css';
 import logo from '../assets/img/ac3292eb-74d7-4c0c-8b47-5aec51ab7a48.png';
 import { useNavigate } from 'react-router-dom';
+import supabase from '../supabaseClient';
+
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    // get initial user
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setCurrentUser(data?.user ?? null);
+    };
+    loadUser();
+
+    // subscribe to auth changes (keeps UI in sync)
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => {
+      // cleanup subscription
+      subscription?.subscription?.unsubscribe?.();
+      // for older/newer SDK shapes, try both
+      if (subscription?.unsubscribe) subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login'); // adjust route if your login route is different
+  };
+
+  // Display name preference: full_name (metadata) -> email -> id
+  const displayName =
+    currentUser?.user_metadata?.full_name ||
+    currentUser?.email ||
+    currentUser?.id ||
+    'Guest';
+
   return (
     <div>
       {/* Header */}
@@ -15,16 +52,17 @@ const Dashboard = () => {
             <span>Child Information Management System</span>
           </div>
         </div>
+
         <div className="user-section">
-          <span>👤 312312312</span>
-          <span>Staff Caseworker</span>
-          <button className="logout-btn">Logout</button>
+          <span>👤 {displayName}</span>
+          <span>{currentUser?.user_metadata?.role ?? 'Staff Caseworker'}</span>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="dashboard-container">
-        <h3>Welcome back, 312312312</h3>
+        <h3>Welcome back, {displayName}</h3>
         <p>Manage your assigned children and update their records</p>
 
         {/* Summary Cards */}
@@ -79,7 +117,7 @@ const Dashboard = () => {
         {/* Recent Activity */}
         <h4>Recent Activity</h4>
         <div className="recent-activity">
-        <span> <b> Latest updates and changes in the system </b> </span>
+          <span><b> Latest updates and changes in the system </b></span>
           <div className="activity-card">
             <span>New child profile added: Maria Santos</span>
             <span>2 hours ago • by System</span>
