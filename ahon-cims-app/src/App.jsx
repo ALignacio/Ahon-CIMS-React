@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import supabase from "./lib/supabaseClient";
-import Login from "./features/auth/login.jsx";
+import Login from "./features/auth/Login.jsx";
 import SignUp from "./features/auth/SignUp.jsx";
 import Dashboard from "./features/dashboard/dashboard.jsx";
 import AccessModule from "./features/children/child-record.jsx";
