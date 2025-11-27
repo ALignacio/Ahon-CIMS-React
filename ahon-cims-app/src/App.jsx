@@ -7,6 +7,7 @@ import Dashboard from "./features/dashboard/dashboard.jsx";
 import AccessModule from "./features/children/child-record.jsx";
 import Reports from "./components/reports.jsx";
 import "./App.css";
+import ChildProfile from "./features/children/ChildProfile.jsx";
 
 function AuthLoader({ children, onAuthChange }) {
   // small container to keep one auth subscription for the app
@@ -93,6 +94,15 @@ export default function App() {
             element={
               <RequireAuth>
                 <AccessModule />
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/child-records/:id"
+            element={
+              <RequireAuth>
+                <ChildProfile />
               </RequireAuth>
             }
           />
