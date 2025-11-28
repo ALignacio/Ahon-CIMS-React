@@ -94,8 +94,13 @@
   color: #065f46;
   padding: 8px 12px;
   font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+  
 }
 
 .footer button:hover {
-  background: #f0fff7;
+  background: linear-gradient(90deg, #059669, #22c55e); /* green gradient */
+  border-color: #059669;
+  color: #ffffff; /* white text on hover */
 }
